@@ -1,0 +1,42 @@
+import cv2
+
+vid = cv2.VideoCapture(0)
+
+face_cascade = cv2.CascadeClassifier("herarcascade/frontalface.xml")
+eye_cascade = cv2.CascadeClassifier("herarcascade/eye.xml")
+smile_cascade = cv2.CascadeClassifier("herarcascade/smile.xml")
+
+while True:
+    _,frame = vid.read()
+    frame = cv2.flip(frame,1)
+    frame = cv2.resize(frame,(1280,720))
+
+    gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+    
+    face = face_cascade.detectMultiScale(gray)
+
+    for(x,y,w,h) in face:
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+
+
+        roi_gray = gray[y:y+h,x:x+w]
+        roi_frame = frame[y:y+h,x:x+w]
+
+        eyes = eye_cascade.detectMultiScale(roi_gray,1.05,5)
+
+        for(ex,ey,ew,eh) in eyes:
+            cv2.rectangle(roi_frame,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+            
+
+        smile = smile_cascade.detectMultiScale(roi_gray,1.5,20)    
+
+        for(sx,sy,sw,sh) in smile:
+            cv2.rectangle(roi_frame,(sx,sy),(sx+sw,sy+sh),(0,0,255),2)
+
+    cv2.imshow("Frame",frame)
+    if cv2.waitKey(5) & 0xFF == ord('q'):
+        break
+
+vid.release()
+cv2.destroyAllWindows()
+
